@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <style type="text/css">
+        body {
+            height: 100%;
+            background: -webkit-linear-gradient(to right, aliceblue, #91ccf3);
+            background: -o-linear-gradient(to right, aliceblue, #91ccf3);
+            background: -moz-linear-gradient(to right, aliceblue, #91ccf3);
+            background: linear-gradient(to right, aliceblue, #91ccf3);
+        }
+
+        .head {
+            background-color: #91ccf3;
+            text-align: center;
+            font-size: 24px;
+            color: aliceblue;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .msg {
+            text-align: center;
+            font-size: 24px;
+            color: red;
+        }
+
+        #forms {
+            height: 350px;
+            width: 1004px;
+            margin: 0 auto;
+        }
+
+        form {
+            display: inline-block;
+            width: 500px;
+            height: 350px;
+            float: left;
+            text-align: center;
+        }
+
+        #regForm {
+            border: solid black;
+            border-width: 0 1px 0 0;
+        }
+
+        #logForm {
+            border: solid black;
+            border-width: 0 0 0 1px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        label span {
+            display: inline-block;
+            width: 100px;
+            line-height: 40px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        label input {
+            box-sizing: border-box;
+            display: inline-block;
+            font-size: 24px;
+            width: 390px;
+            height: 40px;
+        }
+
+        input[type='button'],
+        input[type='submit'] {
+            height: 40px;
+            width: 100px;
+            margin: 10px 30px;
+        }
+
+        #authDiv {
+            text-align: center;
+        }
+
+        #authDiv a {
+            display: block;
+            margin: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>基于区块链的供应链融资平台</h1>
+    <p class="msg" th:if="${msg != null}" th:text="${msg}"></p>
+    <p class="msg" th:if="${param.msg != null}" th:text="${param.msg}"></p>
+    <p class="msg" th:if="${param.error != null}">登录失败</p>
+
+    <div id="forms" sec:authorize="!isAuthenticated()">
+        <form id="regForm" th:action="@{/register}" method="post">
+            <h2>注册</h2>
+            <label><span>名称：</span><input id="name" type="text" name="name"></label>
+            <label><span>地址：</span><input id="address" type="text" name="address" readonly></label>
+            <label><span>公钥：</span><input id="publicKey" type="text" name="publicKey" readonly></label>
+            <label><span>私钥：</span><input id="privateKey" type="text" name="privateKey" readonly></label>
+            <input type="button" id="genBut" value="生成密钥对"><input type="button" id="subBut" value="注册">
+        </form>
+        <form id="logForm" th:action="@{/login}" method="post">
+            <h2>登录</h2>
+            <label><span>名称：</span><input type="text" readonly placeholder="无需填写"></label>
+            <label><span>地址：</span><input type="text" name="address" th:value="${address}"></label>
+            <label><span>公钥：</span><input type="text" readonly placeholder="无需填写"></label>
+            <label><span>私钥：</span><input type="password" name="privateKey" th:value="${privateKey}"></label>
+            <input type="submit" value="登录">
+        </form>
+    </div>
+
+    <div id="authDiv" sec:authorize="isAuthenticated()">
+        <h2>已创建的链的部署地址</h2>
+        <a th:if="${contracts != null}" th:each="contract,contractStat:${contracts}" th:text="${contract.address}"
+            th:href="@{/supplychain/} + ${contract.address}"></a>
+        <button id="depBut">部署一个新的供应链</button>
+        <form id="deployForm" th:action="@{/supplychain/deploy}" method="post" style="display: none">
+        </form>
+    </div>
+</body>
+
+<script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+<script sec:authorize="!isAuthenticated()">
+    $("#genBut").click(function () {
+        $.ajax({
+            url: "/generate",
+            success: function (data) {
+                if (data != null) {
+                    document.getElementById("address").removeAttribute("readonly");
+                    document.getElementById("publicKey").removeAttribute("readonly");
+                    document.getElementById("privateKey").removeAttribute("readonly");
+                    var splits = data.split(";");
+                    $("#address").val(splits[0]);
+                    $("#publicKey").val(splits[1]);
+                    $("#privateKey").val(splits[2]);
+                    document.getElementById("address").setAttribute("readonly", "true");
+                    document.getElementById("publicKey").setAttribute("readonly", "true");
+                    document.getElementById("privateKey").setAttribute("readonly", "true");
+                }
+            }
+        })
+    });
+    $("#subBut").click(function () {
+        var address = $("#address").val();
+        var publicKey = $("#publicKey").val();
+        var privateKey = $("#privateKey").val();
+        var name = $("#name").val();
+        if (address == null || address === "" || publicKey == null || publicKey === "" || privateKey == null || privateKey === "" || name == null || name === "") {
+            alert("请完善注册信息");
+            return;
+        }
+        $("#regForm").submit();
+    })
+</script>
+<script sec:authorize="isAuthenticated()">
+    $("#depBut").click(function () {
+        $("#deployForm").submit();
+    })
+</script>
+
+</html>

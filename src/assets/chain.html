@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<head>
+    <meta charset="UTF-8">
+    <title>区块链</title>
+    <style type="text/css">
+        body {
+            height: 100%;
+            background: -webkit-linear-gradient(to right, aliceblue, #91ccf3);
+            background: -o-linear-gradient(to right, aliceblue, #91ccf3);
+            background: -moz-linear-gradient(to right, aliceblue, #91ccf3);
+            background: linear-gradient(to right, aliceblue, #91ccf3);
+        }
+
+        .head {
+            background-color: #91ccf3;
+            text-align: center;
+            font-size: 24px;
+            color: aliceblue;
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        .msg {
+            text-align: center;
+            font-size: 24px;
+            color: red;
+        }
+
+        table {
+            margin: 0 auto;
+            border: solid black;
+            border-width: 0 0 0 0;
+        }
+
+        th,
+        td {
+            border: solid black;
+            border-width: 1px 0 0 0;
+            text-align: center;
+            line-height: 35px;
+            width: 100px;
+        }
+
+        button {
+            line-height: 50px;
+            width: 200px;
+            font-size: 16px;
+        }
+
+        tr td button {
+            font-size: 16px;
+            width: 70px;
+            line-height: 20px;
+        }
+
+        body {
+            text-align: center;
+        }
+
+        .time {
+            width: 200px;
+        }
+
+        .fun {
+            line-height: 0px;
+            width: 200px;
+            /*设置按钮宽度*/
+            height: 30px;
+            /*设置按钮高度*/
+            color: white;
+            /*字体颜色*/
+            background-color: cornflowerblue;
+            /*按钮背景颜色*/
+            border-radius: 3px;
+            /*让按钮变得圆滑一点*/
+            border-width: 0;
+            /*消去按钮丑的边框*/
+            margin: 0;
+            outline: none;
+            /*取消轮廓*/
+            font-size: 16px;
+            /*设置字体大小*/
+            text-align: center;
+            /*字体居中*/
+            cursor: pointer;
+            /*设置鼠标箭头手势*/
+        }
+
+        .fun:hover {
+            background: #5599FF;
+        }
+    </style>
+</head>
+
+<body>
+    <p class="msg" id="ajaxMsg"></p>
+    <p class="msg" th:if="${msg != null}" th:text="${msg}"></p>
+    <p class="msg" th:if="${param.msg != null}" th:text="${param.msg}"></p>
+    <div class="a">
+        <h2>此链上的欠条</h2>
+        <table>
+            <tr>
+                <th>id</th>
+                <th>供应链编号</th>
+                <th>欠款人</th>
+                <th>收益人</th>
+                <th>欠款</th>
+                <th class="time">创建时间</th>
+                <th class="time">还款期限</th>
+                <th>是否可靠</th>
+                <th>操作</th>
+            </tr>
+            <tr th:if="${bills != null}" th:each="bill:${bills}">
+                <td th:text="${bill.id}"></td>
+                <td th:text="${bill.chainNum}"></td>
+                <td th:text="${bill.owner.name}"></td>
+                <td th:text="${bill.beneficiary.name}"></td>
+                <td th:text="${bill.amount}"></td>
+                <td class="time" th:text="${bill.start}"></td>
+                <td class="time" th:text="${bill.end}"></td>
+                <td><button th:attr="bid=${bill.id}" th:text="${bill.isReliable}"
+                        onclick="setBillReliable(this)"></button>
+                </td>
+                <td><button onclick="returnMoney(this)" th:attr="bid=${bill.id}"
+                        th:if="${role == 'auth' && bill.start != '-'}">还款</button></td>
+            </tr>
+        </table>
+    </div>
+    <h2>此链上注册的公司</h2>
+    <table>
+        <tr>
+            <th>名称</th>
+            <th>地址</th>
+            <th>是否认证</th>
+            <th>是否合法</th>
+            <th>操作</th>
+        </tr>
+        <tr th:if="${companies != null}" th:each="company:${companies}">
+            <td th:text="${company.name}"></td>
+            <td th:text="${company.addr}"></td>
+            <td><button class="auth" th:attr="address=${company.addr}" th:text="${company.isAuth}"
+                    onclick="setValidOrAuth(this)"></button></td>
+            <td><button class="valid" th:attr="address=${company.addr}" th:text="${company.isValid}"
+                    onclick="setValidOrAuth(this)"></button></td>
+            <td><button th:attr="address=${company.addr}" onclick="writeBill(this)"
+                    th:if="${(role == 'normal' || role == 'auth') && company.addr != #authentication.principal.address}">写欠条</button>
+            </td>
+        </tr>
+    </table>
+    <h2> </h2>
+    <button class="fun" onclick="register(this)" th:if="${role == 'foreigner'}">申请加入该链</button>
+    <button class="fun" onclick="borrowMoneyFromBank(this)" th:if="${role == 'normal' || role == 'auth'}">向银行借钱</button>
+
+    <form id="fForm" th:action="@{/supplychain/} + ${conAddress}" method="post" style="display: none">
+        <input id="target">
+        <input id="op_type">
+        <input id="flag">
+        <input id="bid">
+        <input id="address">
+        <input id="amount">
+        <input id="time">
+    </form>
+</body>
+
+<script th:src="@{/webjars/jquery/3.3.1/jquery.js}"></script>
+<script>
+    var fForm = $("#fForm");
+    function register(but) {
+        var url = fForm.attr("action") + "/register";
+        fForm.attr("action", url);
+        fForm.submit();
+    }
+    var iaddress = $("#address");
+    var ibid = $("#bid");
+    var iamount = $("#amount");
+    var itime = $("#time");
+    function writeBill(but) {
+        var address = but.getAttribute("address");
+        var amount = prompt("请输入欠该公司的金额：", "");
+        if (!amount) return;
+        var bid = prompt("请提供您持有的欠条的id（认证公司填0即可）：", "");
+        if (!bid) return;
+        var time = prompt("您将在多长时间后还款（普通公司填0即可）？", "");
+        if (!time) return;
+        var url = fForm.attr("action") + "/writeBill";
+        fForm.attr("action", url);
+        iaddress.attr("value", address); iaddress.attr("name", "address");
+        iamount.attr("value", amount); iamount.attr("name", "amount");
+        ibid.attr("value", bid); ibid.attr("name", "bid");
+        itime.attr("value", time); itime.attr("name", "time");
+        fForm.submit();
+    }
+    var itarget = $("#target");
+    var iop_type = $("#op_type");
+    var iflag = $("#flag");
+    function setValidOrAuth(but) {
+        var target = but.getAttribute("address");
+        var op_type = but.getAttribute("class") === "auth";
+        var flag = but.innerText !== "true";
+        var url = fForm.attr("action") + "/setValidOrAuth";
+        fForm.attr("action", url);
+        itarget.attr("value", target); itarget.attr("name", "target");
+        iop_type.attr("value", op_type); iop_type.attr("name", "op_type");
+        iflag.attr("value", flag); iflag.attr("name", "flag");
+        fForm.submit();
+    }
+    function setBillReliable(but) {
+        var bid = but.getAttribute("bid");
+        var flag = but.innerText !== "true";
+        var url = fForm.attr("action") + "/setBillReliable";
+        fForm.attr("action", url);
+        ibid.attr("value", bid); ibid.attr("name", "bid");
+        iflag.attr("value", flag); iflag.attr("name", "flag");
+        fForm.submit();
+    }
+    function borrowMoneyFromBank(but) {
+        var amount = prompt("请输入借款金额：", "");
+        if (!amount) return;
+        var bid = prompt("请提供您持有的欠条的id（认证公司填0即可）：", "");
+        if (!bid) return;
+        var time = prompt("您将在多长时间后还款（普通公司填0即可）？", "");
+        if (!time) return;
+        var url = fForm.attr("action") + "/borrowMoneyFromBank";
+        fForm.attr("action", url);
+        iamount.attr("value", amount); iamount.attr("name", "amount");
+        ibid.attr("value", bid); ibid.attr("name", "bid");
+        itime.attr("value", time); itime.attr("name", "time");
+        fForm.submit();
+    }
+    function returnMoney(but) {
+        var bid = but.getAttribute("bid");
+        var url = fForm.attr("action") + "/returnMoney";
+        fForm.attr("action", url);
+        ibid.attr("value", bid); ibid.attr("name", "bid");
+        fForm.submit();
+    }
+</script>
+
+</html>

@@ -1,0 +1,13 @@
+info|2020-11-29 20:00:00.024279|[P2P][Service] heartBeat,connected count=4
+info|2020-11-29 20:00:00.140579|[g:1][CONSENSUS][SEALER]++++++++++++++++ Generating seal on,blkNum=4,tx=0,nodeIdx=2,hash=48de8c47...
+info|2020-11-29 20:00:00.157983|[g:1][CONSENSUS][PBFT]checkTimeout Succ,view=21194,toView=21195,nodeIdx=2,changeCycle=1,myNode=a12a205f...,timecost=0.23
+info|2020-11-29 20:00:00.159537|[g:1][CONSENSUS][PBFT]checkAndChangeView: Reach consensus,org_view=21194,cur_changeCycle=1,curView=21194,view=21195
+info|2020-11-29 20:00:01.159094|[g:1][CONSENSUS]addRawPrepare,height=4,reqIdx=3,hash=a0a910d0...,time=0
+info|2020-11-29 20:00:01.165548|[g:1][CONSENSUS][PBFT]checkTimeout Succ,view=21195,toView=21196,nodeIdx=2,changeCycle=1,myNode=a12a205f...,timecost=6.427
+info|2020-11-29 20:00:01.171236|[g:1][CONSENSUS][PBFT]checkAndChangeView: Reach consensus,org_view=21195,cur_changeCycle=1,curView=21195,view=21196
+info|2020-11-29 20:00:02.172736|[g:1][CONSENSUS]addRawPrepare,height=4,reqIdx=4,hash=24ed32e1...,time=0
+info|2020-11-29 20:00:02.172929|[g:1][CONSENSUS][PBFT]checkTimeout Succ,view=21196,toView=21197,nodeIdx=2,changeCycle=1,myNode=a12a205f...,timecost=0.17
+info|2020-11-29 20:00:02.175858|[g:1][CONSENSUS][PBFT]checkAndChangeView: Reach consensus,org_view=21196,cur_changeCycle=1,curView=21196,view=21197
+info|2020-11-29 20:00:03.178904|[g:1][CONSENSUS]addRawPrepare,height=4,reqIdx=0,hash=8ab1c63e...,time=0
+info|2020-11-29 20:00:03.179122|[g:1][CONSENSUS][PBFT]checkTimeout Succ,view=21197,toView=21198,nodeIdx=2,changeCycle=1,myNode=a12a205f...,timecost=0.174
+info|2020-11-29 20:00:03.183698|[g:1][CONSENSUS][PBFT]checkAndChangeView: Reach consensus,org_view=21197,cur_changeCycle=1,curView=21197,view=21198
