@@ -9,8 +9,8 @@
 ├── video						// 展示视频（尚未制作）
 └── src							// 源代码
 	├── assets					// 前端网页资源
-	│   ├── chain.html 			// 注册登录主页
-	│   └── index.html 			// 区块链详细信息界面
+	│   ├── chain.html 			// 区块链详细信息界面
+	│   └── index.html 			// 注册登录主页
 	├── fisco					// 本地FISCO BCOS链
 	├── nodejs-sdk				// FISCO BCOS Node.js SDK
 	│   └── packages/cli
